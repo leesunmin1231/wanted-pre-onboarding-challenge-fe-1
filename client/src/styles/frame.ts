@@ -7,3 +7,10 @@ export const AuthFrame = styled.div`
   justify-content: center;
   align-items: center;
 `;
+
+export const TodoFrame = styled.div`
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+`;

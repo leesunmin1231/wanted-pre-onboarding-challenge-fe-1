@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Loading from '../components/Loading';
 import useModal from '../hooks/useModal';
+import TodoList from '../components/TodoList';
+import { TodoFrame } from '../styles/frame';
 
 export default function Todo() {
   const [isLogined, setIsLogined] = useState(false);
@@ -24,5 +26,5 @@ export default function Todo() {
     }
     setIsLogined(true);
   }, [setIsLogined]);
-  return <div>{isLogined ? <div>main</div> : <Loading />}</div>;
+  return <TodoFrame>{isLogined ? <TodoList /> : <Loading />}</TodoFrame>;
 }

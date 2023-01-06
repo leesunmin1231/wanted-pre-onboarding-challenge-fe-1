@@ -27,3 +27,19 @@ export const MiddleButton = styled.button`
     background-color: ${({ theme }) => theme.colors.GRAY2};
   }
 `;
+
+export const SmallButton = styled.button<{ isDelete: boolean }>`
+  width: 50px;
+  height: 30px;
+  cursor: pointer;
+  color: ${({ isDelete }) => (isDelete ? ({ theme }) => theme.colors.RED : ({ theme }) => theme.colors.PRIMARY_DARK)};
+  border: 0px;
+  background-color: ${({ theme }) => theme.colors.WHITE};
+  border-radius: 5px;
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.GRAY4};
+  }
+  &:active {
+    filter: brightness(0.7);
+  }
+`;
