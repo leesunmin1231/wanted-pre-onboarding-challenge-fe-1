@@ -27,7 +27,7 @@ export const AuthBox = styled.div`
   height: min-content;
   display: flex;
   flex-direction: column;
-  border: 2px solid ${({ theme }) => theme.colors.GRAY2};
+  border: 2px solid ${({ theme }) => theme.colors.PRIMARY_DARK};
   border-radius: 15px;
 `;
 
@@ -71,5 +71,5 @@ export const Header = styled.div`
   justify-content: center;
   align-items: center;
   padding: 20px 0px;
-  border-bottom: 1px solid ${({ theme }) => theme.colors.GRAY3};
+  border-bottom: 1px solid ${({ theme }) => theme.colors.PRIMARY_LIGHT};
 `;
