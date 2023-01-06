@@ -58,8 +58,8 @@ function TodoItemBox({ currentTodo }: { currentTodo: todoType }) {
   };
   const deleteHandler = () => {
     setContent('삭제 하시겠습니까?', [
-      { name: 'Cancel', handler: closeModal },
-      { name: 'Confirm', handler: deleteTodo },
+      { name: '취소', handler: closeModal },
+      { name: '삭제', handler: deleteTodo },
     ]);
   };
   const toggleDoneState = () => {

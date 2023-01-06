@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 
 export const MiddleButton = styled.button`
-  width: 130px;
+  width: 110px;
   height: 32px;
   border-radius: 5px;
   border: 0px solid;
