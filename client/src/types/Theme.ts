@@ -1,4 +1,4 @@
-import "@emotion/react"; // it's important to use ThemeProvider
+import '@emotion/react'; // it's important to use ThemeProvider
 
 type styleColors = {
   PRIMARY: string;
@@ -13,18 +13,13 @@ type styleColors = {
   GRAY4: string;
   GRAY5: string;
   RED: string;
-  BLUE: string;
   LIGHT_BLACK: string;
   POINT_COLOR: string;
   BACKGROUND: string;
 };
 
-declare module "@emotion/react" {
+declare module '@emotion/react' {
   export interface Theme {
     colors: styleColors;
-    frameMinWidth: string;
-    frameMaxWidth: string;
-    sideBarMaxWidth: string;
-    sideBarMinWidth: string;
   }
 }
