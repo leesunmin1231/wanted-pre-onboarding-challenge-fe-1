@@ -6,20 +6,36 @@ import { todoList } from '../../../atom';
 import todoType from '../../../types/TodoList';
 import useModal from '../../../hooks/useModal';
 import useTokenError from '../../../hooks/useTokenError';
-import { httpDelete } from '../../../util/http';
+import { httpDelete, httpPut } from '../../../util/http';
 
 function TodoItemBox({ currentTodo }: { currentTodo: todoType }) {
   const setCurrentTodoList = useSetRecoilState(todoList);
-  const [newTodo, setNewTodo] = useState(currentTodo.content);
+  const [newTodo, setNewTodo] = useState(currentTodo.title);
   const [editing, setEditing] = useState(false);
   const { tokenError } = useTokenError();
   const { setContent, closeModal } = useModal();
 
+  const fetchUpdateTodo = async (token: string) => {
+    const response = await httpPut(`/todos/${currentTodo.id}`, token, { title: newTodo, content: '' });
+    const updateData = response.data.data;
+    setCurrentTodoList((prevState) => prevState.map((todo) => (todo.id === updateData.id ? { ...updateData } : todo)));
+    setNewTodo(updateData.title);
+  };
+  const updateTodo = () => {
+    const token = localStorage.getItem('token');
+    if (token === null) {
+      tokenError();
+      return;
+    }
+    fetchUpdateTodo(token);
+    setNewTodo('');
+  };
   const handleTodoSubmit = (e: KeyboardEvent) => {
     if (e.nativeEvent.isComposing) return;
     const { key } = e;
     if (key === 'Enter') {
       setEditing(false);
+      updateTodo();
     }
   };
 

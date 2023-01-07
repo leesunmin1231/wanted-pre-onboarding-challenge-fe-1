@@ -31,6 +31,15 @@ export async function httpPost(url: string, token: string, body: object): Promis
   });
 }
 
+export async function httpPut(url: string, token: string, body: object): Promise<ResponseType> {
+  return axios.put(url, body, {
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: token,
+    },
+  });
+}
+
 export async function httpDelete(url: string, token: string): Promise<ResponseType> {
   return axios.delete(url, {
     headers: {
