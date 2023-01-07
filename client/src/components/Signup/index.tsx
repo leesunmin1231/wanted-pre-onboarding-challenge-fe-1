@@ -6,7 +6,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { MiddleButton } from '../../styles/common';
 import { AuthInput, AuthBox, Header, AuthForm, FieldName, ErrorMessage } from '../../styles/auth';
 import useModal from '../../hooks/useModal';
-import { httpPost } from '../../util/http';
+import { authPost } from '../../util/http';
 
 const schema = yup
   .object({
@@ -55,7 +55,7 @@ export default function Signup() {
   };
   const submitSignup = async () => {
     try {
-      const response = await httpPost('/users/create', { email: formValues.email, password: formValues.password });
+      const response = await authPost('/users/create', { email: formValues.email, password: formValues.password });
       setContent(`${response.data.message}. 바로 로그인 하시겠습니까?`, [
         { name: '취소', handler: closeModal },
         { name: '확인', handler: () => loginAction(response.data.token) },

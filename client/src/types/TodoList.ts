@@ -1,6 +1,7 @@
 export default interface todoType {
-  key: string;
+  title: string;
   content: string;
-  done: boolean;
-  editing: boolean;
+  id: string;
+  createdAt: string;
+  updatedAt: string;
 }

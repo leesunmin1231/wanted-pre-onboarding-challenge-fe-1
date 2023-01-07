@@ -1,23 +1,35 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from '@emotion/styled';
-import { useRecoilValue } from 'recoil';
-import { todoList, completeList } from '../../atom';
+import { useRecoilState } from 'recoil';
+import { todoList } from '../../atom';
 import TodoInputBox from './TodoInputBox';
 import TodoItemBox from './TodoItemBox';
+import { httpGet } from '../../util/http';
+import useTokenError from '../../hooks/useTokenError';
+import todoType from '../../types/TodoList';
 
 function TodoList() {
-  const currentTodoList = useRecoilValue(todoList);
-  const completeTodoList = useRecoilValue(completeList);
+  const [currentTodoList, setCurrentTodoList] = useRecoilState(todoList);
+  const { tokenError } = useTokenError();
+  const fetchData = async (token: string) => {
+    const response: { data: { data: todoType[] } } = await httpGet('/todos', token);
+    setCurrentTodoList([...currentTodoList, ...response.data.data]);
+  };
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token === null) {
+      tokenError();
+      return;
+    }
+    fetchData(token);
+  }, [setCurrentTodoList]);
   return (
     <Wrapper>
       <Header>Todo List</Header>
       <ListBox>
         <TodoInputBox />
         {currentTodoList.map((item) => (
-          <TodoItemBox key={item.key} currentTodo={item} />
-        ))}
-        {completeTodoList.map((item) => (
-          <TodoItemBox key={item.key} currentTodo={item} />
+          <TodoItemBox key={item.id} currentTodo={item} />
         ))}
       </ListBox>
     </Wrapper>

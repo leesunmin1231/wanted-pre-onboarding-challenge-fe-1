@@ -2,16 +2,25 @@ import React, { KeyboardEvent, useState } from 'react';
 import { useSetRecoilState } from 'recoil';
 import styled from '@emotion/styled';
 import { todoList } from '../../../atom';
-import { getListKey } from '../../../util/getListKey';
+import useTokenError from '../../../hooks/useTokenError';
+import { httpPost } from '../../../util/http';
 
 export default function TodoInputBox() {
   const setCurrentTodoList = useSetRecoilState(todoList);
+  const { tokenError } = useTokenError();
   const [newTodo, setNewTodo] = useState('');
 
+  const fetchNewTodo = async (token: string) => {
+    const response = await httpPost('/todos', token, { title: newTodo, content: '' });
+    setCurrentTodoList((prevState) => prevState.concat(response.data.data));
+  };
   const createNewTodo = () => {
-    setCurrentTodoList((prevState) =>
-      prevState.concat({ editing: false, done: false, content: newTodo, key: getListKey() })
-    );
+    const token = localStorage.getItem('token');
+    if (token === null) {
+      tokenError();
+      return;
+    }
+    fetchNewTodo(token);
     setNewTodo('');
   };
 

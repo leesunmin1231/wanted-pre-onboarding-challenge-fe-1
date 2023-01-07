@@ -1,59 +1,39 @@
 import React, { useState, KeyboardEvent } from 'react';
 import styled from '@emotion/styled';
-import { useSetRecoilState, SetterOrUpdater } from 'recoil';
+import { useSetRecoilState } from 'recoil';
 import { SmallButton } from '../../../styles/common';
-import { todoList, completeList } from '../../../atom';
+import { todoList } from '../../../atom';
 import todoType from '../../../types/TodoList';
 import useModal from '../../../hooks/useModal';
+import useTokenError from '../../../hooks/useTokenError';
+import { httpDelete } from '../../../util/http';
 
 function TodoItemBox({ currentTodo }: { currentTodo: todoType }) {
   const setCurrentTodoList = useSetRecoilState(todoList);
-  const setCompleteTodoList = useSetRecoilState(completeList);
   const [newTodo, setNewTodo] = useState(currentTodo.content);
+  const [editing, setEditing] = useState(false);
+  const { tokenError } = useTokenError();
   const { setContent, closeModal } = useModal();
-
-  const setContentState = (setter: SetterOrUpdater<todoType[]>) => {
-    setter((prevState) =>
-      prevState.map((todo) => {
-        if (todo.key === currentTodo.key) return { ...todo, content: newTodo, editing: false };
-        return { ...todo };
-      })
-    );
-  };
-  const setEditingState = (setter: SetterOrUpdater<todoType[]>) => {
-    setter((prevState) =>
-      prevState.map((todo) => {
-        if (todo.key === currentTodo.key) return { ...todo, editing: true };
-        return { ...todo };
-      })
-    );
-  };
 
   const handleTodoSubmit = (e: KeyboardEvent) => {
     if (e.nativeEvent.isComposing) return;
     const { key } = e;
     if (key === 'Enter') {
-      if (currentTodo.done) {
-        setContentState(setCompleteTodoList);
-      } else {
-        setContentState(setCurrentTodoList);
-      }
+      setEditing(false);
     }
   };
 
   const editHandler = () => {
-    if (currentTodo.done) {
-      setEditingState(setCompleteTodoList);
-    } else {
-      setEditingState(setCurrentTodoList);
-    }
+    setEditing(true);
   };
   const deleteTodo = () => {
-    if (currentTodo.done) {
-      setCompleteTodoList((prevState) => prevState.filter((todo) => todo.key !== currentTodo.key));
-    } else {
-      setCurrentTodoList((prevState) => prevState.filter((todo) => todo.key !== currentTodo.key));
+    const token = localStorage.getItem('token');
+    if (token === null) {
+      tokenError();
+      return;
     }
+    httpDelete(`/todos/${currentTodo.id}`, token);
+    setCurrentTodoList((prevState) => prevState.filter((todo) => todo.id !== currentTodo.id));
     closeModal();
   };
   const deleteHandler = () => {
@@ -62,18 +42,9 @@ function TodoItemBox({ currentTodo }: { currentTodo: todoType }) {
       { name: '삭제', handler: deleteTodo },
     ]);
   };
-  const toggleDoneState = () => {
-    if (currentTodo.done) {
-      setCompleteTodoList((prevState) => prevState.filter((todo) => todo.key !== currentTodo.key));
-      setCurrentTodoList((prevState) => prevState.concat({ ...currentTodo, done: false }));
-    } else {
-      setCurrentTodoList((prevState) => prevState.filter((todo) => todo.key !== currentTodo.key));
-      setCompleteTodoList((prevState) => prevState.concat({ ...currentTodo, done: true }));
-    }
-  };
   return (
     <Wrapper>
-      {currentTodo.editing ? (
+      {editing ? (
         <EditBox>
           <InputBox
             type="text"
@@ -86,12 +57,8 @@ function TodoItemBox({ currentTodo }: { currentTodo: todoType }) {
         </EditBox>
       ) : (
         <TodoBox>
-          <TextBox onClick={() => toggleDoneState()}>
-            {currentTodo.done ? (
-              <CompleteText>{currentTodo.content}</CompleteText>
-            ) : (
-              <IncompleteText>{currentTodo.content}</IncompleteText>
-            )}
+          <TextBox>
+            <IncompleteText>{currentTodo.title}</IncompleteText>
           </TextBox>
           <ButtonWrapper>
             <SmallButton onClick={() => editHandler()} isDelete={false}>
@@ -159,11 +126,6 @@ const TextBox = styled.button`
   background-color: ${({ theme }) => theme.colors.WHITE};
   text-align: left;
   cursor: pointer;
-`;
-
-const CompleteText = styled.s`
-  color: ${({ theme }) => theme.colors.GRAY2};
-  font-size: 25px;
 `;
 
 const IncompleteText = styled.div`
