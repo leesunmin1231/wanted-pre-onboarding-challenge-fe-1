@@ -43,3 +43,20 @@ export const SmallButton = styled.button<{ isDelete: boolean }>`
     filter: brightness(0.7);
   }
 `;
+
+export const EmojiButton = styled.button`
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  border: 0px;
+  background-color: ${({ theme }) => theme.colors.WHITE};
+  border-radius: 30px;
+  font-size: 20px;
+  color: ${({ theme }) => theme.colors.PRIMARY};
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.GRAY4};
+  }
+  &:active {
+    filter: brightness(0.7);
+  }
+`;
