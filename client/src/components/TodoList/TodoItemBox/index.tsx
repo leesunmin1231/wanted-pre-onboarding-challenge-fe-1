@@ -1,7 +1,7 @@
 import React, { useState, KeyboardEvent } from 'react';
 import styled from '@emotion/styled';
 import { useSetRecoilState } from 'recoil';
-import { SmallButton } from '../../../styles/common';
+import { SmallButton, EmojiButton } from '../../../styles/common';
 import { todoList } from '../../../atom';
 import todoType from '../../../types/TodoList';
 import useModal from '../../../hooks/useModal';
@@ -10,16 +10,16 @@ import { httpDelete, httpPut } from '../../../util/http';
 
 function TodoItemBox({ currentTodo }: { currentTodo: todoType }) {
   const setCurrentTodoList = useSetRecoilState(todoList);
-  const [newTodo, setNewTodo] = useState(currentTodo.title);
+  const [newTodo, setNewTodo] = useState({ title: currentTodo.title, content: currentTodo.content });
   const [editing, setEditing] = useState(false);
   const { tokenError } = useTokenError();
   const { setContent, closeModal } = useModal();
 
   const fetchUpdateTodo = async (token: string) => {
-    const response = await httpPut(`/todos/${currentTodo.id}`, token, { title: newTodo, content: '' });
+    const response = await httpPut(`/todos/${currentTodo.id}`, token, { ...newTodo });
     const updateData = response.data.data;
     setCurrentTodoList((prevState) => prevState.map((todo) => (todo.id === updateData.id ? { ...updateData } : todo)));
-    setNewTodo(updateData.title);
+    setNewTodo({ title: updateData.title, content: updateData.content });
   };
   const updateTodo = () => {
     const token = localStorage.getItem('token');
@@ -28,14 +28,17 @@ function TodoItemBox({ currentTodo }: { currentTodo: todoType }) {
       return;
     }
     fetchUpdateTodo(token);
-    setNewTodo('');
   };
-  const handleTodoSubmit = (e: KeyboardEvent) => {
+
+  const handleTodoSubmit = () => {
+    setEditing(false);
+    updateTodo();
+  };
+  const handleKeyDown = (e: KeyboardEvent) => {
     if (e.nativeEvent.isComposing) return;
     const { key } = e;
     if (key === 'Enter') {
-      setEditing(false);
-      updateTodo();
+      handleTodoSubmit();
     }
   };
 
@@ -59,16 +62,24 @@ function TodoItemBox({ currentTodo }: { currentTodo: todoType }) {
     ]);
   };
   return (
-    <Wrapper>
+    <Wrapper displayWriteBox={editing}>
       {editing ? (
         <EditBox>
-          <InputBox
-            type="text"
-            placeholder=""
-            onChange={(e) => setNewTodo(e.target.value)}
-            onKeyDown={handleTodoSubmit}
-            value={newTodo}
-            autoFocus
+          <TitleBox>
+            <InputBox
+              type="text"
+              placeholder=""
+              onChange={(e) => setNewTodo((prevState) => ({ ...prevState, title: e.target.value }))}
+              onKeyDown={handleKeyDown}
+              value={newTodo.title}
+              autoFocus
+            />
+            <EmojiButton onClick={handleTodoSubmit}>✓</EmojiButton>
+          </TitleBox>
+          <Write
+            placeholder="상세 내용을 입력하세요"
+            onChange={(e) => setNewTodo((prevState) => ({ ...prevState, content: e.target.value }))}
+            value={newTodo.content}
           />
         </EditBox>
       ) : (
@@ -92,9 +103,10 @@ function TodoItemBox({ currentTodo }: { currentTodo: todoType }) {
 
 export default React.memo(TodoItemBox);
 
-const Wrapper = styled.div`
+const Wrapper = styled.div<{ displayWriteBox: boolean }>`
   width: 100%;
-  height: 55px;
+  height: ${({ displayWriteBox }) => (displayWriteBox ? '260px' : '60px')};
+  transition: all 0.3s ease;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -103,6 +115,14 @@ const Wrapper = styled.div`
 
 const EditBox = styled.div`
   width: 95%;
+  display: flex;
+  flex-direction: column;
+`;
+
+const TitleBox = styled.div`
+  display: flex;
+  align-items: center;
+  padding-right: 10px;
 `;
 
 const InputBox = styled.input`
@@ -147,4 +167,21 @@ const TextBox = styled.button`
 const IncompleteText = styled.div`
   color: ${({ theme }) => theme.colors.BLACK};
   font-size: 25px;
+`;
+
+const Write = styled.textarea`
+  width: 100%;
+  height: 200px;
+  resize: none;
+  border: 0px;
+  border-top: 1px solid ${({ theme }) => theme.colors.GRAY3};
+  font-size: 16px;
+  padding: 10px 15px;
+  &:focus {
+    outline-style: none;
+  }
+  &::placeholder {
+    user-select: none;
+    color: ${({ theme }) => theme.colors.GRAY3};
+  }
 `;
