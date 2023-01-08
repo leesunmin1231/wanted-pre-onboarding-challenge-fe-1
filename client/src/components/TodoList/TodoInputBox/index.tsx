@@ -1,4 +1,4 @@
-import React, { KeyboardEvent, useState } from 'react';
+import React, { KeyboardEvent, useState, useRef, useEffect, RefObject } from 'react';
 import { useSetRecoilState } from 'recoil';
 import styled from '@emotion/styled';
 import { todoList } from '../../../atom';
@@ -10,6 +10,7 @@ import WriteDetail from '../../WriteDetail';
 export default function TodoInputBox() {
   const setCurrentTodoList = useSetRecoilState(todoList);
   const [toggleWriteBox, setToggleWriteBox] = useState(false);
+  const titleInputRef: RefObject<HTMLInputElement> = useRef<HTMLInputElement>(null);
   const { tokenError } = useTokenError();
   const [newTodo, setNewTodo] = useState('');
 
@@ -35,6 +36,12 @@ export default function TodoInputBox() {
       setToggleWriteBox(!toggleWriteBox);
     }
   };
+
+  useEffect(() => {
+    if (titleInputRef.current) {
+      titleInputRef.current.focus();
+    }
+  }, [toggleWriteBox]);
   return (
     <Wrapper displayWriteBox={toggleWriteBox}>
       {toggleWriteBox ? (
@@ -42,11 +49,11 @@ export default function TodoInputBox() {
           <TitleBox>
             <InputBox
               type="text"
-              placeholder="무엇을 해야하나요?"
+              placeholder="제목"
               onChange={(e) => setNewTodo(e.target.value)}
               onKeyDown={handleTodoSubmit}
               value={newTodo}
-              autoFocus
+              ref={titleInputRef}
             />
             <EmojiButton
               onClick={() => {
