@@ -38,7 +38,8 @@ export const AuthForm = styled.form`
   justify-content: center;
   align-items: center;
   flex: 1;
-  padding: 30px 0px;
+  padding-top: 30px;
+  padding-bottom: 20px;
   button {
     margin-top: 10px;
   }

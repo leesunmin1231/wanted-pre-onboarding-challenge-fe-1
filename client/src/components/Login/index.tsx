@@ -1,4 +1,5 @@
 import React, { useState, ChangeEvent, useEffect } from 'react';
+import styled from '@emotion/styled';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
@@ -70,6 +71,45 @@ export default function Login() {
           로그인
         </MiddleButton>
       </AuthForm>
+      <SignUpBox>
+        <SignUpText>계정이 없으세요?</SignUpText>
+        <SignUpButton onClick={() => navigate('/auth/signup')}>회원가입</SignUpButton>
+      </SignUpBox>
     </AuthBox>
   );
 }
+
+const SignUpBox = styled.div`
+  width: 100%;
+  height: 20px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const SignUpText = styled.div`
+  width: 100px;
+  height: 20px;
+  text-align: center;
+  line-height: 20px;
+  color: ${({ theme }) => theme.colors.GRAY1};
+  font-size: 12px;
+`;
+
+const SignUpButton = styled.button`
+  width: 60px;
+  height: 20px;
+  text-align: center;
+  color: ${({ theme }) => theme.colors.GRAY1};
+  font-size: 12px;
+  background-color: ${({ theme }) => theme.colors.WHITE};
+  border: 0px;
+  border-radius: 5px;
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.GRAY4};
+  }
+  &:active {
+    filter: brightness(0.7);
+  }
+`;
