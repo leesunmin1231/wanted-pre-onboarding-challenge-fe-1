@@ -2,7 +2,7 @@ import React, { KeyboardEvent, useState, useRef, useEffect, RefObject } from 're
 import { useSetRecoilState } from 'recoil';
 import styled from '@emotion/styled';
 import { todoList } from '../../../atom';
-import { EmojiButton } from '../../../styles/common';
+import { EmojiButton, WriteDetail } from '../../../styles/common';
 import useTokenError from '../../../hooks/useTokenError';
 import { httpPost } from '../../../util/http';
 
@@ -60,7 +60,7 @@ export default function TodoInputBox() {
             />
             <EmojiButton onClick={handleTodoSubmit}>✓</EmojiButton>
           </TitleBox>
-          <Write
+          <WriteDetail
             placeholder="상세 내용을 입력하세요"
             onChange={(e) => setNewTodo((prevState) => ({ ...prevState, content: e.target.value }))}
           />
@@ -99,22 +99,5 @@ const InputBox = styled.input`
   }
   &:disabled {
     background-color: ${({ theme }) => theme.colors.WHITE};
-  }
-`;
-
-const Write = styled.textarea`
-  width: 100%;
-  height: 200px;
-  resize: none;
-  border: 0px;
-  border-top: 1px solid ${({ theme }) => theme.colors.GRAY3};
-  font-size: 16px;
-  padding: 10px 15px;
-  &:focus {
-    outline-style: none;
-  }
-  &::placeholder {
-    user-select: none;
-    color: ${({ theme }) => theme.colors.GRAY3};
   }
 `;

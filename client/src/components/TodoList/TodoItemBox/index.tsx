@@ -1,7 +1,7 @@
 import React, { useState, KeyboardEvent } from 'react';
 import styled from '@emotion/styled';
 import { useSetRecoilState } from 'recoil';
-import { SmallButton, EmojiButton } from '../../../styles/common';
+import { SmallButton, EmojiButton, WriteDetail } from '../../../styles/common';
 import { todoList } from '../../../atom';
 import todoType from '../../../types/TodoList';
 import useModal from '../../../hooks/useModal';
@@ -33,6 +33,7 @@ function TodoItemBox({ currentTodo }: { currentTodo: todoType }) {
 
   const handleTodoSubmit = () => {
     setEditing(false);
+    setToggleDetailBox(false);
     updateTodo();
   };
   const handleKeyDown = (e: KeyboardEvent) => {
@@ -66,49 +67,42 @@ function TodoItemBox({ currentTodo }: { currentTodo: todoType }) {
   return (
     <Wrapper displayWriteBox={toggleDetailBox}>
       {editing ? (
-        <EditBox>
-          <TitleBox>
-            <InputBox
-              type="text"
-              placeholder=""
-              onChange={(e) => setNewTodo((prevState) => ({ ...prevState, title: e.target.value }))}
-              onKeyDown={handleKeyDown}
-              value={newTodo.title}
-              autoFocus
-            />
-            <EmojiButton onClick={handleTodoSubmit}>✓</EmojiButton>
-          </TitleBox>
-          <Write
-            placeholder="상세 내용을 입력하세요"
+        <TitleBox>
+          <InputBox
+            type="text"
+            placeholder=""
+            onChange={(e) => setNewTodo((prevState) => ({ ...prevState, title: e.target.value }))}
+            onKeyDown={handleKeyDown}
+            value={newTodo.title}
+            autoFocus
+          />
+          <EmojiButton onClick={handleTodoSubmit}>✓</EmojiButton>
+        </TitleBox>
+      ) : (
+        <TitleBox>
+          <ToggleDetailButton onClick={() => setToggleDetailBox(!toggleDetailBox)}>
+            <IncompleteText>{currentTodo.title}</IncompleteText>
+          </ToggleDetailButton>
+          <ButtonWrapper>
+            <SmallButton onClick={() => editHandler()} isDelete={false}>
+              수정
+            </SmallButton>
+            <SmallButton onClick={() => deleteHandler()} isDelete>
+              삭제
+            </SmallButton>
+          </ButtonWrapper>
+        </TitleBox>
+      )}
+      <ContentBox displayWriteBox={toggleDetailBox}>
+        {toggleDetailBox && (
+          <WriteDetail
+            placeholder=""
             onChange={(e) => setNewTodo((prevState) => ({ ...prevState, content: e.target.value }))}
             value={newTodo.content}
+            disabled={!editing}
           />
-        </EditBox>
-      ) : (
-        <TodoBox displayWriteBox={toggleDetailBox}>
-          <TitleBox>
-            <ToggleDetailButton onClick={() => setToggleDetailBox(!toggleDetailBox)}>
-              <IncompleteText>{currentTodo.title}</IncompleteText>
-            </ToggleDetailButton>
-            <ButtonWrapper>
-              <SmallButton onClick={() => editHandler()} isDelete={false}>
-                수정
-              </SmallButton>
-              <SmallButton onClick={() => deleteHandler()} isDelete>
-                삭제
-              </SmallButton>
-            </ButtonWrapper>
-          </TitleBox>
-          {toggleDetailBox && (
-            <Write
-              placeholder="상세 내용을 입력하세요"
-              onChange={(e) => setNewTodo((prevState) => ({ ...prevState, content: e.target.value }))}
-              value={newTodo.content}
-              disabled
-            />
-          )}
-        </TodoBox>
-      )}
+        )}
+      </ContentBox>
     </Wrapper>
   );
 }
@@ -117,26 +111,26 @@ export default React.memo(TodoItemBox);
 
 const Wrapper = styled.div<{ displayWriteBox: boolean }>`
   width: 100%;
-  height: ${({ displayWriteBox }) => (displayWriteBox ? '254px' : '54px')};
+  height: ${({ displayWriteBox }) => (displayWriteBox ? '255px' : '55px')};
   transition: all 0.3s ease;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   border-top: 1px solid ${({ theme }) => theme.colors.GRAY3};
 `;
 
-const EditBox = styled.div`
-  width: 95%;
-  height: 54px;
-  display: flex;
-  flex-direction: column;
-`;
-
 const TitleBox = styled.div`
   display: flex;
-  width: 100%;
+  width: 95%;
   height: 54px;
   align-items: center;
+`;
+
+const ContentBox = styled.div<{ displayWriteBox: boolean }>`
+  width: 100%;
+  height: ${({ displayWriteBox }) => (displayWriteBox ? '200px' : '0px')};
+  transition: all 0.3s ease;
 `;
 
 const InputBox = styled.input`
@@ -144,25 +138,12 @@ const InputBox = styled.input`
   height: 54px;
   border: 0px;
   font-size: 30px;
-  padding: 0px 15px;
   &:focus {
     outline-style: none;
   }
   &::placeholder {
     user-select: none;
     color: ${({ theme }) => theme.colors.GRAY4};
-  }
-`;
-
-const TodoBox = styled.div<{ displayWriteBox: boolean }>`
-  width: 100%;
-  height: ${({ displayWriteBox }) => (displayWriteBox ? '254px' : '54px')};
-  transition: all 0.3s ease;
-  display: flex;
-  flex-direction: column;
-  padding: 0px 15px;
-  &:first-of-type {
-    border-top: 0px;
   }
 `;
 
@@ -183,24 +164,4 @@ const ToggleDetailButton = styled.button`
 const IncompleteText = styled.div`
   color: ${({ theme }) => theme.colors.BLACK};
   font-size: 25px;
-`;
-
-const Write = styled.textarea`
-  width: 100%;
-  height: 200px;
-  resize: none;
-  border: 0px;
-  border-top: 1px solid ${({ theme }) => theme.colors.GRAY3};
-  font-size: 16px;
-  padding: 10px 15px;
-  &:focus {
-    outline-style: none;
-  }
-  &::placeholder {
-    user-select: none;
-    color: ${({ theme }) => theme.colors.GRAY3};
-  }
-  &:disabled {
-    background-color: ${({ theme }) => theme.colors.WHITE};
-  }
 `;

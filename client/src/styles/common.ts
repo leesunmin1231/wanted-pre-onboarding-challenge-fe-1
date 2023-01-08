@@ -60,3 +60,23 @@ export const EmojiButton = styled.button`
     filter: brightness(0.7);
   }
 `;
+
+export const WriteDetail = styled.textarea`
+  width: 100%;
+  height: 200px;
+  resize: none;
+  border: 0px;
+  border-top: 1px solid ${({ theme }) => theme.colors.GRAY3};
+  font-size: 16px;
+  padding: 10px 15px;
+  &:focus {
+    outline-style: none;
+  }
+  &::placeholder {
+    user-select: none;
+    color: ${({ theme }) => theme.colors.GRAY3};
+  }
+  &:disabled {
+    background-color: ${({ theme }) => theme.colors.WHITE};
+  }
+`;

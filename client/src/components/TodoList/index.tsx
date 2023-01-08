@@ -39,15 +39,15 @@ function TodoList() {
 export default React.memo(TodoList);
 
 const Wrapper = styled.div`
-  width: 500px;
+  width: 700px;
   padding-bottom: 50px;
+  margin-top: 30px;
 `;
 
 const Header = styled.header`
   font-size: 40px;
-  width: 500px;
-  height: 120px;
-  padding-top: 60px;
+  width: 700px;
+  height: 60px;
   text-align: center;
   color: ${({ theme }) => theme.colors.PRIMARY};
 `;
