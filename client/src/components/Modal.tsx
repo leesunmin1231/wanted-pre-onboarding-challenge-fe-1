@@ -66,7 +66,8 @@ const ModalBox = styled.div`
 
 const Message = styled.div`
   width: min-content;
-  line-height: 60px;
+  line-height: 30px;
+  margin-bottom: 20px;
   height: max-content;
   text-align: center;
   white-space: pre;
