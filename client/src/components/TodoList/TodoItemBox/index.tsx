@@ -12,6 +12,7 @@ function TodoItemBox({ currentTodo }: { currentTodo: todoType }) {
   const setCurrentTodoList = useSetRecoilState(todoList);
   const [newTodo, setNewTodo] = useState({ title: currentTodo.title, content: currentTodo.content });
   const [editing, setEditing] = useState(false);
+  const [toggleDetailBox, setToggleDetailBox] = useState(false);
   const { tokenError } = useTokenError();
   const { setContent, closeModal } = useModal();
 
@@ -44,6 +45,7 @@ function TodoItemBox({ currentTodo }: { currentTodo: todoType }) {
 
   const editHandler = () => {
     setEditing(true);
+    setToggleDetailBox(true);
   };
   const deleteTodo = () => {
     const token = localStorage.getItem('token');
@@ -62,7 +64,7 @@ function TodoItemBox({ currentTodo }: { currentTodo: todoType }) {
     ]);
   };
   return (
-    <Wrapper displayWriteBox={editing}>
+    <Wrapper displayWriteBox={toggleDetailBox}>
       {editing ? (
         <EditBox>
           <TitleBox>
@@ -83,18 +85,28 @@ function TodoItemBox({ currentTodo }: { currentTodo: todoType }) {
           />
         </EditBox>
       ) : (
-        <TodoBox>
-          <TextBox>
-            <IncompleteText>{currentTodo.title}</IncompleteText>
-          </TextBox>
-          <ButtonWrapper>
-            <SmallButton onClick={() => editHandler()} isDelete={false}>
-              수정
-            </SmallButton>
-            <SmallButton onClick={() => deleteHandler()} isDelete>
-              삭제
-            </SmallButton>
-          </ButtonWrapper>
+        <TodoBox displayWriteBox={toggleDetailBox}>
+          <TitleBox>
+            <ToggleDetailButton onClick={() => setToggleDetailBox(!toggleDetailBox)}>
+              <IncompleteText>{currentTodo.title}</IncompleteText>
+            </ToggleDetailButton>
+            <ButtonWrapper>
+              <SmallButton onClick={() => editHandler()} isDelete={false}>
+                수정
+              </SmallButton>
+              <SmallButton onClick={() => deleteHandler()} isDelete>
+                삭제
+              </SmallButton>
+            </ButtonWrapper>
+          </TitleBox>
+          {toggleDetailBox && (
+            <Write
+              placeholder="상세 내용을 입력하세요"
+              onChange={(e) => setNewTodo((prevState) => ({ ...prevState, content: e.target.value }))}
+              value={newTodo.content}
+              disabled
+            />
+          )}
         </TodoBox>
       )}
     </Wrapper>
@@ -105,7 +117,7 @@ export default React.memo(TodoItemBox);
 
 const Wrapper = styled.div<{ displayWriteBox: boolean }>`
   width: 100%;
-  height: ${({ displayWriteBox }) => (displayWriteBox ? '260px' : '60px')};
+  height: ${({ displayWriteBox }) => (displayWriteBox ? '254px' : '54px')};
   transition: all 0.3s ease;
   display: flex;
   justify-content: center;
@@ -115,14 +127,16 @@ const Wrapper = styled.div<{ displayWriteBox: boolean }>`
 
 const EditBox = styled.div`
   width: 95%;
+  height: 54px;
   display: flex;
   flex-direction: column;
 `;
 
 const TitleBox = styled.div`
   display: flex;
+  width: 100%;
+  height: 54px;
   align-items: center;
-  padding-right: 10px;
 `;
 
 const InputBox = styled.input`
@@ -140,10 +154,12 @@ const InputBox = styled.input`
   }
 `;
 
-const TodoBox = styled.div`
+const TodoBox = styled.div<{ displayWriteBox: boolean }>`
   width: 100%;
-  height: 54px;
+  height: ${({ displayWriteBox }) => (displayWriteBox ? '254px' : '54px')};
+  transition: all 0.3s ease;
   display: flex;
+  flex-direction: column;
   padding: 0px 15px;
   &:first-of-type {
     border-top: 0px;
@@ -156,7 +172,7 @@ const ButtonWrapper = styled.div`
   align-items: center;
 `;
 
-const TextBox = styled.button`
+const ToggleDetailButton = styled.button`
   flex: 1;
   border: 0px;
   background-color: ${({ theme }) => theme.colors.WHITE};
@@ -183,5 +199,8 @@ const Write = styled.textarea`
   &::placeholder {
     user-select: none;
     color: ${({ theme }) => theme.colors.GRAY3};
+  }
+  &:disabled {
+    background-color: ${({ theme }) => theme.colors.WHITE};
   }
 `;
