@@ -1,4 +1,4 @@
-import React, { useState, KeyboardEvent } from 'react';
+import React, { useState, KeyboardEvent, useEffect } from 'react';
 import styled from '@emotion/styled';
 import { useSetRecoilState } from 'recoil';
 import { SmallButton, EmojiButton, WriteDetail } from '../../../styles/common';
@@ -12,7 +12,8 @@ function TodoItemBox({ currentTodo }: { currentTodo: todoType }) {
   const setCurrentTodoList = useSetRecoilState(todoList);
   const [newTodo, setNewTodo] = useState({ title: currentTodo.title, content: currentTodo.content });
   const [editing, setEditing] = useState(false);
-  const [toggleDetailBox, setToggleDetailBox] = useState(false);
+  const [toggleContentBox, setToggleContentBox] = useState(false);
+  const [openContentBox, setOpenContentBox] = useState(false);
   const { tokenError } = useTokenError();
   const { setContent, closeModal } = useModal();
 
@@ -33,7 +34,7 @@ function TodoItemBox({ currentTodo }: { currentTodo: todoType }) {
 
   const handleTodoSubmit = () => {
     setEditing(false);
-    setToggleDetailBox(false);
+    setToggleContentBox(false);
     updateTodo();
   };
   const handleKeyDown = (e: KeyboardEvent) => {
@@ -46,7 +47,7 @@ function TodoItemBox({ currentTodo }: { currentTodo: todoType }) {
 
   const editHandler = () => {
     setEditing(true);
-    setToggleDetailBox(true);
+    setToggleContentBox(true);
   };
   const deleteTodo = () => {
     const token = localStorage.getItem('token');
@@ -64,8 +65,20 @@ function TodoItemBox({ currentTodo }: { currentTodo: todoType }) {
       { name: '삭제', handler: deleteTodo },
     ]);
   };
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+    if (toggleContentBox) {
+      setOpenContentBox(true);
+    } else {
+      timer = setTimeout(() => setOpenContentBox(false), 200);
+    }
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [toggleContentBox]);
+
   return (
-    <Wrapper displayWriteBox={toggleDetailBox}>
+    <Wrapper displayWriteBox={toggleContentBox}>
       {editing ? (
         <TitleBox>
           <InputBox
@@ -80,7 +93,7 @@ function TodoItemBox({ currentTodo }: { currentTodo: todoType }) {
         </TitleBox>
       ) : (
         <TitleBox>
-          <ToggleDetailButton onClick={() => setToggleDetailBox(!toggleDetailBox)}>
+          <ToggleDetailButton onClick={() => setToggleContentBox(!toggleContentBox)}>
             <IncompleteText>{currentTodo.title}</IncompleteText>
           </ToggleDetailButton>
           <ButtonWrapper>
@@ -93,8 +106,8 @@ function TodoItemBox({ currentTodo }: { currentTodo: todoType }) {
           </ButtonWrapper>
         </TitleBox>
       )}
-      <ContentBox displayWriteBox={toggleDetailBox}>
-        {toggleDetailBox && (
+      <ContentBox displayWriteBox={toggleContentBox}>
+        {openContentBox && (
           <WriteDetail
             placeholder=""
             onChange={(e) => setNewTodo((prevState) => ({ ...prevState, content: e.target.value }))}
