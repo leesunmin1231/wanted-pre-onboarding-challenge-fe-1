@@ -1,41 +1,51 @@
 import React, { useState, KeyboardEvent, useEffect } from 'react';
 import styled from '@emotion/styled';
-import { useSetRecoilState } from 'recoil';
+import { useMutation, useQueryClient } from 'react-query';
 import { SmallButton, EmojiButton, WriteDetail } from '../../../styles/common';
-import { todoList } from '../../../atom';
-import todoType from '../../../types/TodoList';
+import type todoResponseType from '../../../types/TodoResponse';
+import type todoItemType from '../../../types/TodoItem';
+import type errorResponseType from '../../../types/ErrorResponse';
 import useModal from '../../../hooks/useModal';
-import useTokenError from '../../../hooks/useTokenError';
 import { httpDelete, httpPut } from '../../../util/http';
 
-function TodoItemBox({ currentTodo }: { currentTodo: todoType }) {
-  const setCurrentTodoList = useSetRecoilState(todoList);
+function TodoItemBox({ currentTodo }: { currentTodo: todoResponseType }) {
+  const queryClient = useQueryClient();
   const [newTodo, setNewTodo] = useState({ title: currentTodo.title, content: currentTodo.content });
   const [editing, setEditing] = useState(false);
   const [toggleContentBox, setToggleContentBox] = useState(false);
   const [openContentBox, setOpenContentBox] = useState(false);
-  const { tokenError } = useTokenError();
   const { setContent, closeModal } = useModal();
 
-  const fetchUpdateTodo = async (token: string) => {
-    const response = await httpPut(`/todos/${currentTodo.id}`, token, { ...newTodo });
-    const updateData = response.data.data;
-    setCurrentTodoList((prevState) => prevState.map((todo) => (todo.id === updateData.id ? { ...updateData } : todo)));
-    setNewTodo({ title: updateData.title, content: updateData.content });
-  };
-  const updateTodo = () => {
-    const token = localStorage.getItem('token');
-    if (token === null) {
-      tokenError();
-      return;
+  const updateTodoMutate = useMutation(
+    'updateTodo',
+    (todo: todoItemType) => httpPut(`/todos/${currentTodo.id}`, todo),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(['todos']);
+      },
+      onError: (error: errorResponseType) => {
+        setContent(`${error.response.status}: ${error.response.statusText}\nmessage: ${error.response.data.message}`, [
+          { name: '확인', handler: closeModal },
+        ]);
+      },
     }
-    fetchUpdateTodo(token);
-  };
+  );
+
+  const deleteTodoMutate = useMutation('deleteTodo', () => httpDelete(`/todos/${currentTodo.id}`), {
+    onSuccess: () => {
+      queryClient.invalidateQueries(['todos']);
+    },
+    onError: (error: errorResponseType) => {
+      setContent(`${error.response.status}: ${error.response.statusText}\nmessage: ${error.response.data.message}`, [
+        { name: '확인', handler: closeModal },
+      ]);
+    },
+  });
 
   const handleTodoSubmit = () => {
     setEditing(false);
     setToggleContentBox(false);
-    updateTodo();
+    updateTodoMutate.mutate(newTodo);
   };
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.nativeEvent.isComposing) return;
@@ -50,13 +60,7 @@ function TodoItemBox({ currentTodo }: { currentTodo: todoType }) {
     setToggleContentBox(true);
   };
   const deleteTodo = () => {
-    const token = localStorage.getItem('token');
-    if (token === null) {
-      tokenError();
-      return;
-    }
-    httpDelete(`/todos/${currentTodo.id}`, token);
-    setCurrentTodoList((prevState) => prevState.filter((todo) => todo.id !== currentTodo.id));
+    deleteTodoMutate.mutate();
     closeModal();
   };
   const deleteHandler = () => {

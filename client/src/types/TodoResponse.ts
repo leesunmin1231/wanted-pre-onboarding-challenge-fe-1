@@ -1,4 +1,4 @@
-export default interface todoType {
+export default interface todoResponseType {
   title: string;
   content: string;
   id: string;

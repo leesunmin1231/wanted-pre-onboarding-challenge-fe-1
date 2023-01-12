@@ -5,16 +5,14 @@ import Loading from '../components/Loading';
 import TodoList from '../components/TodoList';
 import { TodoFrame } from '../styles/frame';
 import { MiddleButton } from '../styles/common';
-import useTokenError from '../hooks/useTokenError';
 
 export default function Todo() {
   const [isLogined, setIsLogined] = useState(false);
   const navigate = useNavigate();
-  const { tokenError } = useTokenError();
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token === null) {
-      tokenError();
+      throw new Error();
     }
     setIsLogined(true);
   }, [setIsLogined]);

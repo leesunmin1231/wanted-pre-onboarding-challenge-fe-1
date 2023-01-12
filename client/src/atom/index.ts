@@ -1,14 +1,9 @@
 import { atom } from 'recoil';
-import todoType from '../types/TodoList';
+import todoResponseType from '../types/TodoResponse';
 import modalType from '../types/Modal';
 
-export const todoList = atom<todoType[]>({
+export const todoList = atom<todoResponseType[]>({
   key: 'todoList',
-  default: [],
-});
-
-export const completeList = atom<todoType[]>({
-  key: 'completeList',
   default: [],
 });
 

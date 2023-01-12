@@ -1,36 +1,28 @@
-import React, { useEffect } from 'react';
+import React, { useState } from 'react';
 import styled from '@emotion/styled';
-import { useRecoilState } from 'recoil';
-import { todoList } from '../../atom';
+import { useQuery } from 'react-query';
+import type todoResponseType from '../../types/TodoResponse';
 import TodoInputBox from './TodoInputBox';
 import TodoItemBox from './TodoItemBox';
 import { httpGet } from '../../util/http';
-import useTokenError from '../../hooks/useTokenError';
-import todoType from '../../types/TodoList';
+import Loading from '../Loading';
+import useModal from '../../hooks/useModal';
 
 function TodoList() {
-  const [currentTodoList, setCurrentTodoList] = useRecoilState(todoList);
-  const { tokenError } = useTokenError();
-  const fetchData = async (token: string) => {
-    const response: { data: { data: todoType[] } } = await httpGet('/todos', token);
-    setCurrentTodoList([...currentTodoList, ...response.data.data]);
-  };
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token === null) {
-      tokenError();
-      return;
-    }
-    fetchData(token);
-  }, [setCurrentTodoList]);
+  const [currentTodoList, setCurrentTodoList] = useState<todoResponseType[]>([]);
+  const { setContent, closeModal } = useModal();
+  const { isLoading } = useQuery(['todos'], () => httpGet('/todos'), {
+    refetchOnWindowFocus: true,
+    staleTime: 60 * 1000,
+    onSuccess: (data) => setCurrentTodoList([...data]),
+    onError: (error) => setContent(`${error}`, [{ name: '확인', handler: closeModal }]),
+  });
   return (
     <Wrapper>
       <Header>Todo List</Header>
       <ListBox>
         <TodoInputBox />
-        {currentTodoList.map((item) => (
-          <TodoItemBox key={item.id} currentTodo={item} />
-        ))}
+        {isLoading ? <Loading /> : currentTodoList.map((item) => <TodoItemBox key={item.id} currentTodo={item} />)}
       </ListBox>
     </Wrapper>
   );
@@ -56,4 +48,8 @@ const ListBox = styled.div`
   height: min-content;
   background-color: ${({ theme }) => theme.colors.WHITE};
   box-shadow: rgb(0 0 0 / 20%) 0px 2px 5px 1px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 `;

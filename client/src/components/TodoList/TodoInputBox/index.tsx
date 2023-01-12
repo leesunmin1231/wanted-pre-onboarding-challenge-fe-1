@@ -1,29 +1,31 @@
 import React, { KeyboardEvent, useState, useRef, useEffect, RefObject } from 'react';
-import { useSetRecoilState } from 'recoil';
 import styled from '@emotion/styled';
-import { todoList } from '../../../atom';
+import { useMutation, useQueryClient } from 'react-query';
+import type todoItemType from '../../../types/TodoItem';
+import type errorResponseType from '../../../types/ErrorResponse';
 import { EmojiButton, WriteDetail } from '../../../styles/common';
-import useTokenError from '../../../hooks/useTokenError';
 import { httpPost } from '../../../util/http';
+import useModal from '../../../hooks/useModal';
 
 export default function TodoInputBox() {
-  const setCurrentTodoList = useSetRecoilState(todoList);
+  const { setContent, closeModal } = useModal();
+  const queryClient = useQueryClient();
   const [toggleWriteBox, setToggleWriteBox] = useState(false);
   const titleInputRef: RefObject<HTMLInputElement> = useRef<HTMLInputElement>(null);
-  const { tokenError } = useTokenError();
   const [newTodo, setNewTodo] = useState({ title: '', content: '' });
 
-  const fetchNewTodo = async (token: string) => {
-    const response = await httpPost('/todos', token, { ...newTodo });
-    setCurrentTodoList((prevState) => prevState.concat(response.data.data));
-  };
+  const postNewTodoMutate = useMutation(['postNewTodo'], (todo: todoItemType) => httpPost('/todos', { ...todo }), {
+    onSuccess: () => {
+      queryClient.invalidateQueries(['todos']);
+    },
+    onError: (error: errorResponseType) => {
+      setContent(`${error.response.status}: ${error.response.statusText}\nmessage: ${error.response.data.message}`, [
+        { name: '확인', handler: closeModal },
+      ]);
+    },
+  });
   const createNewTodo = () => {
-    const token = localStorage.getItem('token');
-    if (token === null) {
-      tokenError();
-      return;
-    }
-    fetchNewTodo(token);
+    postNewTodoMutate.mutate(newTodo);
     setNewTodo({ title: '', content: '' });
   };
 

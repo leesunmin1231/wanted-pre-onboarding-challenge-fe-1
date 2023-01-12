@@ -5,6 +5,7 @@ interface ResponseType {
   status: number;
   statusText: string;
 }
+
 export async function authPost(url: string, body: object): Promise<ResponseType> {
   return axios.post(url, body, {
     headers: {
@@ -13,38 +14,58 @@ export async function authPost(url: string, body: object): Promise<ResponseType>
   });
 }
 
-export async function httpGet(url: string, token: string): Promise<ResponseType> {
-  return axios.get(url, {
+export async function httpGet(url: string): Promise<any> {
+  const token = localStorage.getItem('token');
+  if (token === null) {
+    throw new Error('token error');
+  }
+  const response: ResponseType = await axios.get(url, {
     headers: {
       'Content-Type': 'application/json',
       Authorization: token,
     },
   });
+  return response.data.data;
 }
 
-export async function httpPost(url: string, token: string, body: object): Promise<ResponseType> {
-  return axios.post(url, body, {
+export async function httpPost(url: string, body: object): Promise<any> {
+  const token = localStorage.getItem('token');
+  if (token === null) {
+    throw new Error('token error');
+  }
+  const response: ResponseType = await axios.post(url, body, {
     headers: {
       'Content-Type': 'application/json',
       Authorization: token,
     },
   });
+  return response.data.data;
 }
 
-export async function httpPut(url: string, token: string, body: object): Promise<ResponseType> {
-  return axios.put(url, body, {
+export async function httpPut(url: string, body: object): Promise<any> {
+  const token = localStorage.getItem('token');
+  if (token === null) {
+    throw new Error('token error');
+  }
+  const response: ResponseType = await axios.put(url, body, {
     headers: {
       'Content-Type': 'application/json',
       Authorization: token,
     },
   });
+  return response.data.data;
 }
 
-export async function httpDelete(url: string, token: string): Promise<ResponseType> {
-  return axios.delete(url, {
+export async function httpDelete(url: string): Promise<any> {
+  const token = localStorage.getItem('token');
+  if (token === null) {
+    throw new Error('token error');
+  }
+  const response: ResponseType = await axios.delete(url, {
     headers: {
       'Content-Type': 'application/json',
       Authorization: token,
     },
   });
+  return response.data.data;
 }
