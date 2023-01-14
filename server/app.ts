@@ -16,6 +16,13 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 app.use(cors());
+function waitForSec(sec: number) {
+  return new Promise((resolve) => setTimeout(resolve, sec * 1000));
+}
+app.use(async (res, req, next) => {
+  await waitForSec(1);
+  next();
+});
 
 app.use("/todos", todoRouter);
 app.use("/users", userRouter);

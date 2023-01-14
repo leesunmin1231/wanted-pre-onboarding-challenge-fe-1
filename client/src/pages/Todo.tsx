@@ -5,6 +5,7 @@ import TodoList from '../components/TodoList';
 import { TodoFrame } from '../styles/frame';
 import { MiddleButton } from '../styles/common';
 import useAuthCheck from '../hooks/useAuthCheck';
+import Loading from '../components/Loading';
 
 export default function Todo() {
   const navigate = useNavigate();
@@ -19,7 +20,7 @@ export default function Todo() {
         <Title>LOGO</Title>
         {isLogined && <MiddleButton onClick={logoutAction}>로그아웃</MiddleButton>}
       </TopBar>
-      {isLogined && <TodoList />}
+      {isLogined ? <TodoList /> : <Loading />}
     </TodoFrame>
   );
 }
